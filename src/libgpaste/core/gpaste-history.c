@@ -320,29 +320,57 @@ g_paste_history_add (GPasteHistory *self,
     _g_paste_history_add (self, item, TRUE);
 }
 
+static gint
+compare_item_uuid (gconstpointer a,
+                   gconstpointer b)
+{
+    const GPasteItem *item = a;
+    const gchar *uuid = b;
+
+    return g_strcmp0 (g_paste_item_get_uuid (item), uuid);
+}
+
+static GList *
+_g_paste_history_private_get_by_uuid (const GPasteHistoryPrivate *priv,
+                                      const gchar                *uuid)
+{
+    GList *history = priv->history;
+
+    return g_list_find_custom (history, uuid, compare_item_uuid);
+}
+
+static GPasteItem *
+g_paste_history_private_get_by_uuid (const GPasteHistoryPrivate *priv,
+                                     const gchar                *uuid)
+{
+    GList *item = _g_paste_history_private_get_by_uuid (priv, uuid);
+
+    return (item) ? item->data : NULL;
+}
+
 /**
  * g_paste_history_remove:
  * @self: a #GPasteHistory instance
- * @index: the index of the #GPasteItem to delete
+ * @uuid: the uuid of the #GPasteItem to delete
  *
  * Delete a #GPasteItem from the #GPasteHistory
  */
 G_PASTE_VISIBLE void
 g_paste_history_remove (GPasteHistory *self,
-                        guint64        index)
+                        const gchar   *uuid)
 {
     g_return_if_fail (_G_PASTE_IS_HISTORY (self));
 
     GPasteHistoryPrivate *priv = g_paste_history_get_instance_private (self);
     GList *history = priv->history;
 
-    g_debug ("history: remove '%" G_GUINT64_FORMAT "'", index);
+    g_debug ("history: remove '%s'", uuid);
 
-    g_return_if_fail (index < g_list_length (history));
-
-    GList *item = g_list_nth (history, index);
+    GList *item = _g_paste_history_private_get_by_uuid (priv, uuid);
 
     g_return_if_fail (item);
+
+    guint64 index = g_list_position (history, item);
 
     g_paste_history_private_remove (priv, item, TRUE);
 
@@ -400,26 +428,6 @@ g_paste_history_private_get (const GPasteHistoryPrivate *priv,
         return NULL;
 
     return G_PASTE_ITEM (g_list_nth_data (history, index));
-}
-
-static gint
-compare_item_uuid (gconstpointer a,
-                   gconstpointer b)
-{
-    const GPasteItem *item = a;
-    const gchar *uuid = b;
-
-    return g_strcmp0 (g_paste_item_get_uuid (item), uuid);
-}
-
-static GPasteItem *
-g_paste_history_private_get_by_uuid (const GPasteHistoryPrivate *priv,
-                                     const gchar                *uuid)
-{
-    GList *history = priv->history;
-    GList *item = g_list_find_custom (history, uuid, compare_item_uuid);
-
-    return (item) ? item->data : NULL;
 }
 
 /**
@@ -586,6 +594,7 @@ g_paste_history_replace (GPasteHistory *self,
 static GPasteItem *
 _g_paste_history_private_get_password (const GPasteHistoryPrivate *priv,
                                        const gchar                *name,
+                                       const gchar               **uuid,
                                        guint64                    *index)
 {
     guint64 idx = 0;
@@ -596,14 +605,19 @@ _g_paste_history_private_get_password (const GPasteHistoryPrivate *priv,
         if (_G_PASTE_IS_PASSWORD_ITEM (i) &&
             g_paste_str_equal (g_paste_password_item_get_name ((GPastePasswordItem *) i), name))
         {
+            if (uuid)
+                *uuid = g_paste_item_get_uuid (i);
             if (index)
                 *index = idx;
             return i;
         }
     }
 
+    if (uuid)
+        *uuid = NULL;
     if (index)
         *index = -1;
+
     return NULL;
 }
 
@@ -635,7 +649,7 @@ g_paste_history_set_password (GPasteHistory *self,
     GPasteItem *item = todel->data;
 
     g_return_if_fail (_G_PASTE_IS_TEXT_ITEM (item) && g_paste_str_equal (g_paste_item_get_kind (item), "Text"));
-    g_return_if_fail (!_g_paste_history_private_get_password (priv, name, NULL));
+    g_return_if_fail (!_g_paste_history_private_get_password (priv, name, NULL, NULL));
 
     GPasteItem *password = g_paste_password_item_new (name, g_paste_item_get_real_value (item));
 
@@ -659,7 +673,7 @@ g_paste_history_get_password (GPasteHistory *self,
     g_return_val_if_fail (!name || g_utf8_validate (name, -1, NULL), NULL);
 
     const GPasteHistoryPrivate *priv = _g_paste_history_get_instance_private (self);
-    GPasteItem *item = _g_paste_history_private_get_password (priv, name, NULL);
+    GPasteItem *item = _g_paste_history_private_get_password (priv, name, NULL, NULL);
 
     return (item) ? G_PASTE_PASSWORD_ITEM (item) : NULL;
 }
@@ -679,10 +693,10 @@ g_paste_history_delete_password (GPasteHistory *self,
     g_return_if_fail (!name || g_utf8_validate (name, -1, NULL));
 
     const GPasteHistoryPrivate *priv = _g_paste_history_get_instance_private (self);
-    guint64 index;
+    const gchar *uuid;
 
-    if (_g_paste_history_private_get_password (priv, name, &index))
-        g_paste_history_remove (self, index);
+    if (_g_paste_history_private_get_password (priv, name, &uuid, NULL))
+        g_paste_history_remove (self, uuid);
 }
 
 /**
@@ -704,7 +718,7 @@ g_paste_history_rename_password (GPasteHistory *self,
 
     const GPasteHistoryPrivate *priv = _g_paste_history_get_instance_private (self);
     guint64 index = 0;
-    GPasteItem *item = _g_paste_history_private_get_password (priv, old_name, &index);
+    GPasteItem *item = _g_paste_history_private_get_password (priv, old_name, NULL, &index);
     if (item)
     {
         g_paste_password_item_set_name (G_PASTE_PASSWORD_ITEM (item), new_name);

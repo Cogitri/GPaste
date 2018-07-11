@@ -526,7 +526,7 @@ static gint
 g_paste_delete (Context *ctx,
                 GError **error)
 {
-    g_paste_client_delete_sync (ctx->client, _strtoull (ctx->args[0]), error);
+    g_paste_client_delete_sync (ctx->client, ctx->args[0], error);
 
     return (*error) ? EXIT_FAILURE : EXIT_SUCCESS;
 }
@@ -631,7 +631,7 @@ static gint
 g_paste_upload (Context *ctx,
                 GError **error)
 {
-    g_paste_client_upload_sync (ctx->client, _strtoull (ctx->args[0]), error);
+    g_paste_client_upload_sync (ctx->client, ctx->args[0], error);
 
     return (*error) ? EXIT_FAILURE : EXIT_SUCCESS;
 }

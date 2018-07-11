@@ -41,7 +41,7 @@ void     g_paste_client_backup_history_sync             (GPasteClient  *self,
                                                          const gchar   *backup,
                                                          GError       **error);
 void     g_paste_client_delete_sync                     (GPasteClient  *self,
-                                                         guint64        index,
+                                                         const gchar   *uuid,
                                                          GError       **error);
 void     g_paste_client_delete_history_sync             (GPasteClient  *self,
                                                          const gchar   *name,
@@ -112,7 +112,7 @@ void     g_paste_client_track_sync                      (GPasteClient  *self,
                                                          gboolean       state,
                                                          GError       **error);
 void     g_paste_client_upload_sync                     (GPasteClient  *self,
-                                                         guint64        index,
+                                                         const gchar   *uuid,
                                                          GError       **error);
 
 GPasteItemKind g_paste_client_get_element_kind_sync (GPasteClient  *self,
@@ -144,7 +144,7 @@ void g_paste_client_backup_history             (GPasteClient       *self,
                                                 GAsyncReadyCallback callback,
                                                 gpointer            user_data);
 void g_paste_client_delete                     (GPasteClient       *self,
-                                                guint64             index,
+                                                const gchar        *uuid,
                                                 GAsyncReadyCallback callback,
                                                 gpointer            user_data);
 void g_paste_client_delete_history             (GPasteClient       *self,
@@ -241,7 +241,7 @@ void g_paste_client_track                      (GPasteClient       *self,
                                                 GAsyncReadyCallback callback,
                                                 gpointer            user_data);
 void g_paste_client_upload                     (GPasteClient       *self,
-                                                guint64             index,
+                                                const gchar        *uuid,
                                                 GAsyncReadyCallback callback,
                                                 gpointer            user_data);
 

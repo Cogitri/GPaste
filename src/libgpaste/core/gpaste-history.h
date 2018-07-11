@@ -23,7 +23,7 @@ G_PASTE_FINAL_TYPE (History, history, HISTORY, GObject)
 void              g_paste_history_add                (GPasteHistory *self,
                                                       GPasteItem    *item);
 void              g_paste_history_remove             (GPasteHistory *self,
-                                                      guint64        index);
+                                                      const gchar   *uuid);
 const GPasteItem *g_paste_history_get                (GPasteHistory *self,
                                                       guint64        index);
 const GPasteItem *g_paste_history_get_by_uuid        (GPasteHistory *self,

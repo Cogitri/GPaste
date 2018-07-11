@@ -145,7 +145,7 @@ g_paste_ui_history_refresh_history (GObject      *source_object G_GNUC_UNUSED,
     {
         for (guint64 i = old_size; i < priv->size; ++i)
         {
-            GtkWidget *item = g_paste_ui_item_new (priv->client, priv->settings, priv->rootwin, i);
+            GtkWidget *item = g_paste_ui_item_new (priv->client, priv->settings, priv->rootwin, NULL /* FIXME */, i);
             priv->items = g_slist_append (priv->items, item);
         }
         g_paste_ui_history_add_list (GTK_CONTAINER (self), g_slist_nth (priv->items, old_size));

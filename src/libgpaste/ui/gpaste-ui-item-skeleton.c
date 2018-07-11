@@ -165,25 +165,27 @@ g_paste_ui_item_skeleton_set_markup (GPasteUiItemSkeleton *self,
 }
 
 static void
-action_set_index (gpointer data,
-                  gpointer user_data)
+action_set_uuid (gpointer data,
+                 gpointer user_data)
 {
     GPasteUiItemAction *a = data;
-    guint64 *i = user_data;
+    const gchar *uuid = user_data;
 
-    g_paste_ui_item_action_set_index (a, *i);
+    g_paste_ui_item_action_set_uuid (a, uuid);
 }
 
 /**
- * g_paste_ui_item_skeleton_set_index:
+ * g_paste_ui_item_skeleton_set_uuid_and_index:
  * @self: the #GPasteUiItemSkeleton instance
+ * @uuid: the new uuid to display
  * @index: the new index to display
  *
- * Changes the displayed index
+ * Changes the displayed uuid
  */
 G_PASTE_VISIBLE void
-g_paste_ui_item_skeleton_set_index (GPasteUiItemSkeleton *self,
-                                    guint64               index)
+g_paste_ui_item_skeleton_set_uuid_and_index (GPasteUiItemSkeleton *self,
+                                             const gchar          *uuid,
+                                             guint64               index)
 {
     g_return_if_fail (_G_PASTE_IS_UI_ITEM_SKELETON (self));
 
@@ -192,7 +194,7 @@ g_paste_ui_item_skeleton_set_index (GPasteUiItemSkeleton *self,
 
     gtk_label_set_text (priv->index_label, _index);
 
-    g_slist_foreach (priv->actions, action_set_index, &index);
+    g_slist_foreach (priv->actions, action_set_uuid, (gchar *) uuid);
 }
 
 /**

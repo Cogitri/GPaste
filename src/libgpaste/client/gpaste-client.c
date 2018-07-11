@@ -297,17 +297,17 @@ g_paste_client_backup_history_sync (GPasteClient *self,
 /**
  * g_paste_client_delete_sync:
  * @self: a #GPasteClient instance
- * @index: the index of the element we want to delete
+ * @uuid: the uuid of the element we want to delete
  * @error: a #GError
  *
  * Delete an item from the #GPasteDaemon
  */
 G_PASTE_VISIBLE void
 g_paste_client_delete_sync (GPasteClient *self,
-                            guint64       index,
+                            const gchar  *uuid,
                             GError      **error)
 {
-    DBUS_CALL_ONE_PARAM_NO_RETURN (DELETE, uint64, index);
+    DBUS_CALL_ONE_PARAM_NO_RETURN (DELETE, string, uuid);
 }
 
 /**
@@ -740,17 +740,17 @@ g_paste_client_track_sync (GPasteClient *self,
 /**
  * g_paste_client_upload_sync:
  * @self: a #GPasteClient instance
- * @index: the index of the element we want to upload
+ * @uuid: the uuid of the element we want to upload
  * @error: a #GError
  *
  * Upload an item to a pastebin service
  */
 G_PASTE_VISIBLE void
 g_paste_client_upload_sync (GPasteClient *self,
-                            guint64       index,
+                            const gchar  *uuid,
                             GError      **error)
 {
-    DBUS_CALL_ONE_PARAM_NO_RETURN (UPLOAD, uint64, index);
+    DBUS_CALL_ONE_PARAM_NO_RETURN (UPLOAD, string, uuid);
 }
 
 /*******************/
@@ -875,7 +875,7 @@ g_paste_client_backup_history (GPasteClient       *self,
 /**
  * g_paste_client_delete:
  * @self: a #GPasteClient instance
- * @index: the index of the element we want to delete
+ * @uuid: the uuid of the element we want to delete
  * @callback: (nullable): A #GAsyncReadyCallback to call when the request is satisfied or %NULL if you don't
  * care about the result of the method invocation.
  * @user_data: (nullable): The data to pass to @callback.
@@ -884,11 +884,11 @@ g_paste_client_backup_history (GPasteClient       *self,
  */
 G_PASTE_VISIBLE void
 g_paste_client_delete (GPasteClient       *self,
-                       guint64             index,
+                       const gchar        *uuid,
                        GAsyncReadyCallback callback,
                        gpointer            user_data)
 {
-    DBUS_CALL_ONE_PARAM_ASYNC (DELETE, uint64, index);
+    DBUS_CALL_ONE_PARAM_ASYNC (DELETE, string, uuid);
 }
 
 /**
@@ -1358,7 +1358,7 @@ g_paste_client_track (GPasteClient *self,
 /**
  * g_paste_client_upload:
  * @self: a #GPasteClient instance
- * @index: the index of the element we want to upload
+ * @uuid: the uuid of the element we want to upload
  * @callback: (nullable): A #GAsyncReadyCallback to call when the request is satisfied or %NULL if you don't
  * care about the result of the method invocation.
  * @user_data: (nullable): The data to pass to @callback.
@@ -1367,11 +1367,11 @@ g_paste_client_track (GPasteClient *self,
  */
 G_PASTE_VISIBLE void
 g_paste_client_upload (GPasteClient       *self,
-                       guint64             index,
+                       const gchar        *uuid,
                        GAsyncReadyCallback callback,
                        gpointer            user_data)
 {
-    DBUS_CALL_ONE_PARAM_ASYNC (UPLOAD, uint64, index);
+    DBUS_CALL_ONE_PARAM_ASYNC (UPLOAD, string, uuid);
 }
 
 /****************************/

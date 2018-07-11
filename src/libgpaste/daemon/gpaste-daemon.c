@@ -363,8 +363,7 @@ static void
 g_paste_daemon_private_delete (const GPasteDaemonPrivate *priv,
                                GVariant                  *parameters)
 {
-    g_paste_history_remove (priv->history,
-                            g_paste_daemon_get_dbus_uint64_parameter (parameters));
+    g_paste_history_remove (priv->history, g_paste_daemon_get_dbus_string_parameter (parameters, NULL));
 }
 
 static void
@@ -810,19 +809,23 @@ g_paste_daemon_private_upload_finish (GObject      *source_object,
 /**
  * g_paste_daemon_upload:
  * @self: (transfer none): the #GPasteDaemon
- * @index: the index of the item to upload
+ * @uuid: the uuid of the item to upload
  *
  * Upload an item to a pastebin service
  */
 G_PASTE_VISIBLE void
 g_paste_daemon_upload (GPasteDaemon *self,
-                       guint64       index)
+                       const gchar  *uuid)
 {
     g_return_if_fail (_G_PASTE_IS_DAEMON (self));
 
     GPasteDaemonPrivate *priv = g_paste_daemon_get_instance_private (self);
+    const GPasteItem *item = g_paste_history_get_by_uuid (priv->history, uuid);
+
+    if (!item) return;
+
+    const gchar *value = g_paste_item_get_value (item);
     GSubprocess *upload = g_subprocess_new (G_SUBPROCESS_FLAGS_STDIN_PIPE|G_SUBPROCESS_FLAGS_STDOUT_PIPE, NULL, "wgetpaste", NULL);
-    const gchar *value = g_paste_history_get_value (priv->history, index);
 
     g_subprocess_communicate_utf8_async (upload,
                                          value,
@@ -835,7 +838,7 @@ static void
 _g_paste_daemon_upload (GPasteDaemon *self,
                         GVariant     *parameters)
 {
-    g_paste_daemon_upload(self, g_paste_daemon_get_dbus_uint64_parameter (parameters));
+    g_paste_daemon_upload (self, g_paste_daemon_get_dbus_string_parameter (parameters, NULL));
 }
 
 static void

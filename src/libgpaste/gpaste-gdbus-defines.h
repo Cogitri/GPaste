@@ -80,7 +80,7 @@ G_BEGIN_DECLS
         "   <arg type='s' direction='in' name='backup'  />"               \
         "  </method>"                                                     \
         "  <method name='" G_PASTE_DAEMON_DELETE "'>"                     \
-        "   <arg type='t' direction='in' name='index' />"                 \
+        "   <arg type='s' direction='in' name='index' />"                 \
         "  </method>"                                                     \
         "  <method name='" G_PASTE_DAEMON_DELETE_HISTORY "'>"             \
         "   <arg type='s' direction='in' name='name' />"                  \
@@ -161,7 +161,7 @@ G_BEGIN_DECLS
         "   <arg type='b' direction='in' name='tracking-state' />"        \
         "  </method>"                                                     \
         "  <method name='" G_PASTE_DAEMON_UPLOAD "'>"                     \
-        "   <arg type='t' direction='in' name='index' />"                 \
+        "   <arg type='s' direction='in' name='uuid' />"                  \
         "  </method>"                                                     \
         "  <signal name='" G_PASTE_DAEMON_SIG_DELETE_HISTORY "'>"         \
         "   <arg type='s' direction='out' name='history' />"              \

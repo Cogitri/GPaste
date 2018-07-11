@@ -19,6 +19,7 @@ typedef struct
 
     GtkWindow      *rootwin;
 
+    const gchar    *uuid;
     guint64         index;
     gboolean        bold;
 
@@ -42,7 +43,7 @@ g_paste_ui_item_activate (GPasteUiItem *self)
 
     const GPasteUiItemPrivate *priv = _g_paste_ui_item_get_instance_private (self);
 
-    if (priv->index == (guint64) -1)
+    if (!priv->uuid)
         return FALSE;
 
     g_paste_client_select (priv->client, priv->index, NULL, NULL);
@@ -66,7 +67,7 @@ g_paste_ui_item_refresh (GPasteUiItem *self)
 
     const GPasteUiItemPrivate *priv = _g_paste_ui_item_get_instance_private (self);
 
-    g_paste_ui_item_set_index (self, priv->index);
+    g_paste_ui_item_set_uuid_and_index (self, priv->uuid, priv->index);
 }
 
 static void
@@ -126,22 +127,26 @@ g_paste_ui_item_reset_text (GPasteUiItem *self)
 }
 
 /**
- * g_paste_ui_item_set_index:
+ * g_paste_ui_item_set_uuid_and_index:
  * @self: a #GPasteUiItem instance
+ * @uuid: the uuid of the corresponding item
  * @index: the index of the corresponding item
  *
- * Track a new index
+ * Track a new uuid
  */
 G_PASTE_VISIBLE void
-g_paste_ui_item_set_index (GPasteUiItem *self,
-                           guint64       index)
+g_paste_ui_item_set_uuid_and_index (GPasteUiItem *self,
+                                    const gchar  *uuid,
+                                    guint64       index)
 {
     g_return_if_fail (_G_PASTE_IS_UI_ITEM (self));
     GPasteUiItemPrivate *priv = g_paste_ui_item_get_instance_private (self);
 
-    g_paste_ui_item_skeleton_set_index (G_PASTE_UI_ITEM_SKELETON (self), index);
+    // TODO: should we access it by there too ?
+    g_paste_ui_item_skeleton_set_uuid_and_index (G_PASTE_UI_ITEM_SKELETON (self), uuid, index);
 
     guint64 old_index = priv->index;
+    priv->uuid = uuid;
     priv->index = index;
 
     if (!index)
@@ -149,7 +154,7 @@ g_paste_ui_item_set_index (GPasteUiItem *self,
     else if (!old_index)
         priv->bold = FALSE;
 
-    if (index != (guint64)-1)
+    if (uuid)
     {
         g_paste_ui_item_reset_text (self);
         gtk_widget_show (GTK_WIDGET (self));
@@ -182,6 +187,7 @@ g_paste_ui_item_init (GPasteUiItem *self)
 {
     GPasteUiItemPrivate *priv = g_paste_ui_item_get_instance_private (self);
 
+    priv->uuid = NULL;
     priv->index = -1;
 }
 
@@ -190,6 +196,7 @@ g_paste_ui_item_init (GPasteUiItem *self)
  * @client: a #GPasteClient instance
  * @settings: a #GPasteSettings instance
  * @rootwin: the root #GtkWindow
+ * @uuid: the uuid of the corresponding item
  * @index: the index of the corresponding item
  *
  * Create a new instance of #GPasteUiItem
@@ -201,6 +208,7 @@ G_PASTE_VISIBLE GtkWidget *
 g_paste_ui_item_new (GPasteClient   *client,
                      GPasteSettings *settings,
                      GtkWindow      *rootwin,
+                     const gchar    *uuid,
                      guint64         index)
 {
     g_return_val_if_fail (_G_PASTE_IS_CLIENT (client), NULL);
@@ -214,7 +222,7 @@ g_paste_ui_item_new (GPasteClient   *client,
     priv->settings = g_object_ref (settings);
     priv->rootwin = rootwin;
 
-    g_paste_ui_item_set_index (G_PASTE_UI_ITEM (self), index);
+    g_paste_ui_item_set_uuid_and_index (G_PASTE_UI_ITEM (self), uuid, index);
 
     return self;
 }
